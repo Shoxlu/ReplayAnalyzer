@@ -20,11 +20,14 @@ struct zGlobalsInner;
 struct zReplayManager;
 struct zSupervisor;
 struct zGlobals;
+struct zUpdateFunc;
 
 typedef int(__thiscall* FunctionPtrArg1)(void* thisPtr, int32_t arg1);
 typedef int(__thiscall* FunctionPtr)(zMainMenu* thisPtr);
 typedef int(__thiscall* supervisor_change_gamemode_ptr)(zSupervisor* thisPtr);
-typedef int(__thiscall* zReplayManagerInit_ptr)(zReplayManager* thisPtr, int32_t mode, char* string);
+typedef void(__cdecl* operator_delete_ptr)(void* thisPtr);
+typedef zUpdateFunc*(__stdcall* zUpdateFunc__op_new)(void* thisPtr);
+
 
 struct zAnmId
 {
@@ -539,27 +542,102 @@ struct Output {
 struct Dir {
     int32_t key;
 };
-struct zGlobalsInner {
-    int32_t stage_num;
-    int32_t gap[12];
-    int32_t miss_count;
+struct zGlobalsInner
+{
+    int player_stage_num;
+    int __stage_num;
+    int field_8;
+    int field_C;
+    int field_10;
+    int field_14;
+    int shottype;
+    int subshot;
+    int field_20;
+    int difficulty;
+    int time_in_stage;
+    int field_2C;
+    int field_30;
+    int field_34;
+    int field_38;
+    int field_3C;
+    int field_40;
+    int field_44;
+    int field_48;
+    int graze_counter;
+    int field_50;
+    int field_54;
+    int field_58;
+    int field_5C;
+    int field_60;
+    int field_64;
+    int field_68;
+    int field_6C;
+    int field_70;
+    int field_74;
+    int field_78;
+    int field_7C;
+    int field_80;
+    int field_84;
+    int field_88;
+    int field_8C;
+    int field_90;
+    int field_94;
+    int field_98;
+    int field_9C;
+    int field_A0;
+    int field_A4;
+    int field_A8;
+    int field_AC;
+    int field_B0;
+    int field_B4;
+    int field_B8;
+    int field_BC;
+    int field_C0;
+    int field_C4;
+    int field_C8;
+    int field_CC;
+    int field_D0;
+    int field_D4;
+    int field_D8;
+    int field_DC;
+    float field_E0;
+    int field_E4;
+    int field_E8;
+    int field_EC;
+    int field_F0;
+    int field_F4;
+    int field_F8;
+    int field_FC;
 };
-struct zGlobals {
-    BYTE gap[28];//0x0
-    int32_t stage_num;//28
-    int32_t stage_num_started_from;//?????????? //32
-    BYTE gap2[4];//36
-    int32_t time_in_stage;//40
-    BYTE gap1[30];//44
-    int32_t graze_counter;//74
-    BYTE gap4[10];//78
-    int32_t miss_count;//88
-    BYTE gap3[38];//92
-    int32_t current_lives;//130 ???
-    BYTE gap10[12];
-    int32_t current_bombs;
-    //offset 0x88 : Global life count
+
+
+struct zGlobals
+{
+    int field_0;
+    int field_4;
+    int field_8;
+    int field_C;
+    int field_10;
+    int time;
+    int demorpy_index;
+    zGlobalsInner inner;
 };
+//struct zGlobals {
+//    BYTE gap[28];//0x0
+//    int32_t stage_num; //1C
+//    int32_t stage_num_started_from;//?????????? //20
+//    BYTE gap2[4];//24
+//    int32_t time_in_stage;//28
+//    BYTE gap1[30];//2C
+//    int32_t graze_counter;//4C
+//    BYTE gap4[10];//50
+//    int32_t miss_count;//5A
+//    BYTE gap3[38];//5E
+//    int32_t current_lives;//130 ???
+//    BYTE gap10[12];
+//    int32_t current_bombs;
+//    //offset 0x88 : Global life count
+//};
 struct Color {
     double r;
     double g;
@@ -606,6 +684,12 @@ struct zMainMenu
 {
     int tick_menu_0c_replay() {
         return reinterpret_cast<FunctionPtr>(0x467B10)(this); //call the game method
+    }
+    int set_main_menu_state(int32_t state) {
+        return reinterpret_cast<FunctionPtrArg1>(0x464740)(this, state);
+    }
+    int set_menu(int32_t state) {
+        return reinterpret_cast<FunctionPtrArg1>(0x4646E0)(this, state);
     }
     char __unknown_0;
     __declspec(align(8)) int on_tick;
@@ -792,9 +876,13 @@ struct zUpdateFuncList
 
 struct zUpdateFunc
 {
+    static zUpdateFunc* operator_new(void* func)
+    {
+        return reinterpret_cast<zUpdateFunc__op_new>(0x401530)(func);
+    }
     int priority__;
     int flags;
-    int function_pointer;
+    void* function_pointer;
     zSupervisor* on_registration;
     int on_cleanup;
     zUpdateFuncList list_node;
@@ -829,21 +917,93 @@ struct zReplayLoadedStageData
     zReplayLoadedStageDataList node;
 };
 
+struct zTableStageBossData
+{
+    int spell_bg_anim_index;
+    int spell_bg_anm_script;
+    int stage_bg_visible_during_spell;
+    int spell_portrait_anim_index;
+    int spell_portrait_anm_script;
+    int msg_ename_anim_index;
+    int msg_ename_anm_script;
+    int msg_face_anim_index;
+    int msg_face_anm_script;
+    int front_ename_anm_script;
+};
 
+
+struct zTableStageData
+{
+    int stage_num;
+    int std_filename;
+    int ecl_filename;
+    int stage_bgm_name;
+    int boss_bgm_name;
+    int msg_filenames[4];
+    int stage_logo_anm_filename;
+    int stage_bgm_id;
+    int boss_bgm_id;
+    char __unknown_48;
+    zTableStageBossData boss_data[4];
+};
+
+struct zReplayInfo
+{
+    char replay_name[10];
+    char practice_mode;
+    char __unknown_11;
+    BYTE gapC[16];
+    zConfig config;
+    char __unknown_164;
+    BYTE gapA5[7];
+    int shottype;
+    int subshot;
+    int difficulty;
+    char __unknown_184;
+    BYTE gapB9[15];
+};
+
+struct zReplayGamestateSnapshot
+{
+    __int16 stage;
+    __int16 rng_state;
+    __int16 __unknown_4;
+    __int16 field_6;
+    int field_8;
+    int field_C;
+    int field_10;
+    int field_14;
+    BYTE gap18[332];
+    int owned_card_ids[256];
+    int __cards_timer_2__probably_recharge_times[256];
+    int selected_active_card_id;
+    char __unknown_2408;
+    BYTE gap969[2307];
+};
+
+typedef zReplayManager* (__thiscall* zReplayManagerInit_ptr)(zReplayManager* thisPtr, int32_t mode, char* string);
+typedef zReplayManager* (__thiscall* zReplayManagerInit2_ptr)(char* string);
+typedef void (__thiscall* zReplayManagerDestructor_ptr)(zReplayManager* thisPtr);
 struct zReplayManager
 {
-    zReplayManager(int32_t mode, char* string) {
-        reinterpret_cast<zReplayManagerInit_ptr>(0x4615E0)(this, mode, string);
+    zReplayManager* zReplayManager_init(int32_t mode, char* string) {
+        return reinterpret_cast<zReplayManagerInit_ptr>(0x4615E0)(this, mode, string);
     }
-    char __unknown_0;
-    int on_tick;
-    int on_draw;
+    static zReplayManager* zReplayManager_new(char* string) {
+        return reinterpret_cast<zReplayManagerInit2_ptr>(0x461CF0)(string);
+    }
+    void destructor() {
+        reinterpret_cast<zReplayManagerDestructor_ptr>(0x461AD0)(this);
+    }
+    int __unknown_0;
+    zUpdateFunc* on_tick;
+    zUpdateFunc* on_draw;
     int mode;
     DWORD isSpeedup;
     int replay_file;
-    int replay_info;
-    int stage_gamestate_snapshots;
-    BYTE gap20[28];
+    zReplayInfo* replay_info;
+    zReplayGamestateSnapshot* stage_gamestate_snapshots[7];
+    int field_38;
     zReplayChunkList recorded_chunk_list_heads_by_stage[8];
     int currently_recording_chunk;
     int num_chunks_currently_recorded;
@@ -851,10 +1011,10 @@ struct zReplayManager
     int __replay_info_0x204;
     int current_fps_during_playback;
     int current_tick_num_in_stage;
-    int on_tick_22;
-    int stage_num;
-    char __unknown_536;
-    __declspec(align(4)) char filename[256];
+    zUpdateFunc* on_tick_22;
+    int player_stage_num;
+    int __unknown_536;
+    char filename[256];
 };
 
 enum Keys {

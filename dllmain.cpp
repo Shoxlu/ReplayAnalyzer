@@ -27,12 +27,10 @@ void patch_call(DWORD target, void* func) {
 }
 
 
-
-
 int32_t analyze_state = 0;
 void init();
 void update();
-void start_replay();
+void load_replay();
 void register_update();
 
 
@@ -59,8 +57,10 @@ BOOL APIENTRY DllMain( HMODULE hModule,
         patch_call(0x4719B8, init);
         BYTE fix_missing_bytes2[] = { 0x90, 0x90, 0x90 };
         BYTE fix_missing_bytes[] = { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
+        BYTE change_timer_replay_title[] = { 0x83, 0xF9, 0x00, 0x90, 0x90, 0x90 };
         writeMemory(0x4719B8+0x5, fix_missing_bytes2, sizeof(fix_missing_bytes2));
         writeMemory(0x462A67, fix_missing_bytes, sizeof(fix_missing_bytes));
+        //writeMemory(0x464F7C, change_timer_replay_title, sizeof(change_timer_replay_title));
         printf("End of dll init");
         break;
     }
@@ -81,47 +81,51 @@ void init() {
 }
 
 void register_update() {
-    zUpdateFunc* update_function = new zUpdateFunc();
-    update_function->flags &= 0xFFFFFFFE;
-    update_function->function_pointer = 0;
-    update_function->on_registration = 0;
-    update_function->on_cleanup = 0;
-    update_function->priority__ = 0;
-    update_function->list_node.entry = update_function;
-    update_function->list_node.next = 0;
-    update_function->list_node.prev = 0;
-    update_function->list_node.__seldom_used = 0;
+    zUpdateFunc* update_function = zUpdateFunc::operator_new(update);
     update_function->flags |= 3u;
-    update_function->function_pointer = (int)update;
-    update_function->on_registration = 0;
-    update_function->on_cleanup = 0;
-    update_function->ecx_arg_to_function = 0;
-    register__on_tick(update_function, 0);
+    register__on_tick(update_function, 20);
 }
 
 void update() {
-    global_ptr->current_lives = 4;
-    if ((*main_menu_ptr)) {
+    //global_ptr->current_lives = 4;
+    if ((*main_menu_ptr) && supervisor_ptr->gamemode_current == 4 && global_ptr->time > 1) {
         if (analyze_state == 0) {
-            memcpy(replay_name_ptr, "th18_01.rpy", 11);
-            //(*main_menu_ptr)->menu_state = 4;
-            char* string = replay_name_ptr;
-            (*main_menu_ptr)->current_menu = 12;
-            (*main_menu_ptr)->menu_state = 0;
-            //supervisor_ptr->gamemode_current = 0;
-            //supervisor_ptr->gamemode_to_switch_to = 13;
-            //supervisor_ptr->change_gamemode();
+            load_replay();
             analyze_state = 2;
         }
         else if (analyze_state == 2) {
-            (*main_menu_ptr)->menu_state = 3;
+            //(*main_menu_ptr)->menu_state = 3;
             analyze_state = 3;
         }
     }
 }
 
-void start_replay() {
+void load_replay() {
     //find a way to get the replay name from the .exe command (??)
-    memcpy(replay_name_ptr, "th18_01.rpy", 11);
+    memcpy(replay_name_ptr, "th18_01.rpy", 12);
+    zReplayManager* replay_man = 0;
+    replay_man = zReplayManager::zReplayManager_new(replay_name_ptr);
+    auto v9 = &replay_man->__stage_array[0].gamestate_at_stage_begin;
+    int j = 0;
+    for (int i = 0; i < 8; ++i)
+    {
+        j = i;
+        if (*v9)
+            break;
+        v9 += 10;
+    }
+    global_ptr->inner.player_stage_num = j;
+    global_ptr->inner.__stage_num = j;
+    supervisor_ptr->gamemode_to_switch_to = 13;
+    auto replay_info = replay_man->replay_info;
+    *CUR_STAGE_DATA_ptr = &STAGE_DATA_TABLE[j];
+    global_ptr->inner.shottype = replay_info->shottype;
+    global_ptr->inner.subshot = replay_info->subshot;
+    global_ptr->inner.field_FC = global_ptr->inner.difficulty;
+    global_ptr->inner.difficulty = replay_info->difficulty;
+    replay_man->destructor();
+    //printf("%d",sizeof(zReplayManager));
+    reinterpret_cast<operator_delete_ptr>(0x48DCA1)(replay_man);
+    *dword_4CF438 = 1;
 }
 
