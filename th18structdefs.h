@@ -1,9 +1,11 @@
 #pragma once
 #include <cstdint>
 #include <d3d9.h>
-#include <d3dx9.h>
+
 #include <dinput.h>
 #include <Windows.h>
+
+//Data from my researches and mostly from th-re-data github
 
 struct zMainMenu;
 struct zBullet;
@@ -23,8 +25,8 @@ struct zGlobals;
 struct zUpdateFunc;
 
 typedef int(__thiscall* FunctionPtrArg1)(void* thisPtr, int32_t arg1);
-typedef int(__thiscall* FunctionPtr)(zMainMenu* thisPtr);
-typedef int(__thiscall* supervisor_change_gamemode_ptr)(zSupervisor* thisPtr);
+typedef int(__thiscall* mainMenuNoArgIntFuncPtr)(zMainMenu* thisPtr);
+typedef int(__thiscall* supervisorNoArgIntFuncPtr)(zSupervisor* thisPtr);
 typedef void(__cdecl* operator_delete_ptr)(void* thisPtr);
 typedef zUpdateFunc*(__stdcall* zUpdateFunc__op_new)(void* thisPtr);
 
@@ -542,74 +544,74 @@ struct Output {
 struct Dir {
     int32_t key;
 };
+
 struct zGlobalsInner
 {
-    int player_stage_num;
-    int __stage_num;
-    int field_8;
-    int field_C;
-    int field_10;
-    int field_14;
-    int shottype;
-    int subshot;
-    int field_20;
-    int difficulty;
-    int time_in_stage;
-    int field_2C;
-    int field_30;
-    int field_34;
-    int field_38;
-    int field_3C;
-    int field_40;
-    int field_44;
-    int field_48;
-    int graze_counter;
-    int field_50;
-    int field_54;
-    int field_58;
-    int field_5C;
-    int field_60;
-    int field_64;
-    int field_68;
-    int field_6C;
-    int field_70;
-    int field_74;
-    int field_78;
-    int field_7C;
-    int field_80;
-    int field_84;
-    int field_88;
-    int field_8C;
-    int field_90;
-    int field_94;
-    int field_98;
-    int field_9C;
-    int field_A0;
-    int field_A4;
-    int field_A8;
-    int field_AC;
-    int field_B0;
-    int field_B4;
-    int field_B8;
-    int field_BC;
-    int field_C0;
-    int field_C4;
-    int field_C8;
-    int field_CC;
-    int field_D0;
-    int field_D4;
-    int field_D8;
-    int field_DC;
+    int32_t stage_num;
+    int32_t __stage_num;
+    int32_t field_8;
+    int32_t time_in_stage;
+    int32_t field_10;
+    int32_t field_14;
+    int32_t shottype;
+    int32_t subshot;
+    int32_t field_20;
+    int32_t difficulty;
+    int32_t field_28;
+    int32_t field_2C;
+    int32_t graze;
+    int32_t graze_weird;
+    int32_t spell_id;
+    int32_t miss_count;
+    int32_t field_40;
+    int32_t field_44;
+    int32_t field_48;
+    int32_t field_4C;
+    int32_t field_50;
+    int32_t current_items;
+    int32_t items_related;
+    int32_t current_power;
+    int32_t max_power;
+    int32_t power_per_level;
+    int32_t field_68;
+    int32_t current_lives;
+    int32_t field_70_unk;
+    int32_t field_74;
+    int32_t field_78;
+    int32_t current_bombs;
+    int32_t field_80;
+    int32_t field_70;
+    int32_t field_88;
+    int32_t field_8C;
+    int32_t field_90;
+    int32_t field_94;
+    int32_t field_98;
+    int32_t field_9C;
+    int32_t field_A0;
+    int32_t field_A4;
+    int32_t field_A8;
+    int32_t field_AC;
+    int32_t field_B0;
+    int32_t field_B4;
+    int32_t field_B8;
+    int32_t field_BC;
+    int32_t field_C0;
+    int32_t field_C4;
+    int32_t field_C8;
+    int32_t field_CC;
+    int32_t field_D0;
+    int32_t field_D4;
+    int32_t field_D8;
+    int32_t field_DC;
     float field_E0;
-    int field_E4;
-    int field_E8;
-    int field_EC;
-    int field_F0;
-    int field_F4;
-    int field_F8;
-    int field_FC;
+    int32_t field_E4;
+    int32_t field_E8;
+    int32_t field_EC;
+    int32_t field_F0;
+    int32_t field_F4;
+    int32_t field_F8;
+    int32_t field_FC;
 };
-
 
 struct zGlobals
 {
@@ -683,7 +685,7 @@ struct zPauseMenu {
 struct zMainMenu
 {
     int tick_menu_0c_replay() {
-        return reinterpret_cast<FunctionPtr>(0x467B10)(this); //call the game method
+        return reinterpret_cast<mainMenuNoArgIntFuncPtr>(0x467B10)(this); //call the game method
     }
     int set_main_menu_state(int32_t state) {
         return reinterpret_cast<FunctionPtrArg1>(0x464740)(this, state);
@@ -804,7 +806,7 @@ struct zSupervisorScreenshotJank
     char screenshot_filename[260];
 };
 
-typedef int(__thiscall* supervisor_change_gamemode_ptr)(zSupervisor* thisPtr);
+typedef int(__thiscall* supervisorNoArgIntFuncPtr)(zSupervisor* thisPtr);
 struct zSupervisor
 {
     DWORD __unknown_0;//0x0
@@ -860,7 +862,7 @@ struct zSupervisor
     D3DCOLOR background_color;
     int change_gamemode() {
 
-        return reinterpret_cast<supervisor_change_gamemode_ptr>(0x455040)(this);
+        return reinterpret_cast<supervisorNoArgIntFuncPtr>(0x455040)(this);
     }
 };
 

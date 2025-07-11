@@ -2,26 +2,50 @@
 
 #include "th18structdefs.h"
 
-typedef int(__stdcall* register__on_tick_ptr)(zUpdateFunc* thisPtr, int32_t arg1);
-int register__on_tick(zUpdateFunc* function_to_register, int32_t priority) {
-	return reinterpret_cast<register__on_tick_ptr>(0x401180)(function_to_register, priority);
-}
+int register__on_tick(zUpdateFunc* function_to_register, int32_t priority);
+void operator_delete(void* ptr);
 
+//Game's data related
+static constexpr int32_t NINPUTSPBULLET = 5;
+static constexpr int32_t NINPUTSENEMY = 3;
+static constexpr int32_t N_BULLETS = 2000;
+static constexpr int32_t INPUTS_MAX = NINPUTSENEMY + NINPUTSPBULLET + 2;
+static constexpr int32_t OUTPUTS_MAX = 5;
 
-Window_struct* WINDOW = (Window_struct*)0x568c30;
-zGlobals* global_ptr = (zGlobals*)0x4cccc0;
-zPlayer** player_ptr = (zPlayer**)0x4CF410;
-zBulletManager** Bullet_PTR = (zBulletManager**)0x4CF2BC;
-int32_t* Inputs = (int32_t*)0x4CA210;
-int32_t* MenuInputs = (int32_t*)0x4ca21C;
-int32_t* MenuInputs_prev = (int32_t*)0x4ca218;
-int32_t* Inputs_prev = (int32_t*)0x4CA214;
-zPauseMenu* pauseMenu_ptr = *(zPauseMenu**)0x4CF40C;
-zMainMenu** main_menu_ptr = (zMainMenu**)0x4cf43c;
-zReplayManager** replay_manager_ptr = (zReplayManager**)0x4CF418;
-zSupervisor* supervisor_ptr = (zSupervisor*)0x4CCDF0;
-zTableStageData** CUR_STAGE_DATA_ptr = (zTableStageData**)0x4CF428;
-zTableStageData* STAGE_DATA_TABLE = (zTableStageData*)0x4C9410; //(zTableStageData STAGE_DATA_TABLE[8])
-int* abilityShop_ptr = (int*)0x4CF2A4;//maybe
-char* replay_name_ptr = (char*)0x4CF2F0;
-int* dword_4CF438 = (int*)0x4CF438;
+//Addresses
+static constexpr int32_t PLAYER_PTR_ADD = 0x4CF410;
+static constexpr int32_t WINDOW_PTR_ADD = 0x568c30;
+static constexpr int32_t GLOBAL_PTR_ADD = 0x4cccc0;
+static constexpr int32_t BULLET_PTR_ADD = 0x4CF2BC;
+static constexpr int32_t INPUT_PTR_ADD = 0x4CA210;
+static constexpr int32_t MENUINPUT_PTR_ADD = 0x4ca21C;
+static constexpr int32_t MENUINPUT_PREV_PTR_ADD = 0x4ca218;
+static constexpr int32_t INPUT_PREV_PTR_ADD = 0x4CA214;
+static constexpr int32_t PAUSEMENU_PTR_ADD = 0x4CF40C;
+static constexpr int32_t ABILITYSHOP_PTR_ADD = 0x4CF2A4;
+static constexpr int32_t REPLAY_NAME_PTR = 0x4CF2F0;
+static constexpr int32_t MAIN_MENU_PTR_ADD = 0x4cf43c;
+static constexpr int32_t SUPERVISOR_PTR_ADD = 0x4CCDF0;
+static constexpr int32_t REPLAY_MANAGER_PTR_ADD = 0x4CF418;
+static constexpr int32_t CUR_STAGE_DATA_ADD = 0x4CF428;
+static constexpr int32_t STAGE_DATA_TABLE_ADD = 0x4C9410;
+
+extern zGlobals* global_ptr;
+extern zPlayer* player_ptr;
+extern zBulletManager* bullet_ptr;
+extern int32_t* Inputs;
+extern int32_t* MenuInputs;
+extern int32_t* Inputs_prev;
+extern int32_t* MenuInputs_prev;
+extern zPauseMenu* pauseMenu_ptr;
+extern zSupervisor* supervisor_ptr;
+extern zMainMenu* main_menu_ptr;
+extern Window_struct* WINDOW;
+extern char* replay_name_ptr;
+extern int32_t* dword_4CF438;
+extern zTableStageData* STAGE_DATA_TABLE;
+extern zTableStageData** CUR_STAGE_DATA;
+extern zReplayManager* replay_manager_ptr;
+
+void retrieve_game_data();
+zPlayer* get_player_ptr();
