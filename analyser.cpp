@@ -5,8 +5,8 @@ Analyzer::Analyzer()
 {
 	observations.resize(2);
 	Sleep(3000);
-	observations[Lives] = WatcherInt(&global_ptr->inner.current_lives);//is it useful to watch for lives when the game already tracks that ? Guess it's PoC...
-	observations[Bombs] = WatcherInt(&global_ptr->inner.current_bombs);
+	observations[Lives] = WatcherInt(&th18::global_ptr->inner.current_lives);//is it useful to watch for lives when the game already tracks that ? Guess it's PoC...
+	observations[Bombs] = WatcherInt(&th18::global_ptr->inner.current_bombs);
 }
 
 Analyzer::~Analyzer()
@@ -38,4 +38,11 @@ void Analyzer::SaveResults(std::string file_name)
 {
 	//Temporary
 	printf("Misses: %d, Bombs used: %d\n", results.n_miss, results.n_bombs);
+	FILE* pfile;
+	fopen_s(&pfile, file_name.c_str(), "w+");
+	if (!pfile) {
+		return;
+	}
+	fprintf(pfile, "Misses: %d\nBombs used: %d\n", results.n_miss, results.n_bombs);
+	fclose(pfile);
 }

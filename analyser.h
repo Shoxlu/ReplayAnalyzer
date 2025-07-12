@@ -7,6 +7,13 @@ enum Watchers {
 	Bombs
 };
 
+enum AnalyzerStates {
+	Init,
+	Running,
+	Ending,
+	Inactive
+};
+
 struct ReplayInfo {
 	ReplayInfo() :n_miss(0), n_bombs(0) {};
 	size_t n_miss;
@@ -21,7 +28,8 @@ public:
 		entry(NULL),
 		prev_entry(NULL),
 		has_decreased(false),
-		has_increased(false) 
+		has_increased(false),
+		diff(0)
 	{
 	};
 
@@ -30,7 +38,8 @@ public:
 		entry(NULL),
 		prev_entry(NULL),
 		has_decreased(false), 
-		has_increased(false)
+		has_increased(false),
+		diff(0)
 	{
 		if (!pEntry) {
 			return;
@@ -78,7 +87,7 @@ public:
 	~Analyzer();
 	void Update();
 	void SaveResults(std::string file_name);
-	int32_t analyze_state = 0;
+	int32_t analyze_state = Init;
 private:
 	std::vector<WatcherInt> observations;
 	ReplayInfo results;

@@ -28,7 +28,7 @@ void patch_call(DWORD target, void* func) {
     patch_call((void*)target, func);
 }
 
-
+using namespace th18;
 
 //My code
 char user_replay_name[256] = {};
@@ -101,20 +101,28 @@ int update() {
     //global_ptr->current_lives = 4;
     //printf("update\n");
     retrieve_game_data();
-   // printf("%x, %d, %d \n", main_menu_ptr, supervisor_ptr->gamemode_current, global_ptr->time);
-    if (main_analyzer->analyze_state == 0 && main_menu_ptr && supervisor_ptr->gamemode_current == 4 && global_ptr->time > 1) {
-        load_replay();
-        main_analyzer->analyze_state = 1;
-    }
-    else if (main_analyzer->analyze_state == 1) {
-       main_analyzer->Update();
-       if (main_menu_ptr && supervisor_ptr->gamemode_current != gamemodes::replay) {
-           main_analyzer->analyze_state = 2;
-       }
-    }
-    else if (main_analyzer->analyze_state == 2) {
-        main_analyzer->SaveResults("Placeholder");
-        main_analyzer->analyze_state = 3;
+    //printf("%x, %d, %d \n", main_menu_ptr, supervisor_ptr->gamemode_current, global_ptr->time);
+    switch (main_analyzer->analyze_state)
+    {
+    case Init:
+        if (main_menu_ptr && supervisor_ptr->gamemode_current == 4 && global_ptr->time > 1) {
+            load_replay();
+            main_analyzer->analyze_state = Running;
+        }
+        break;
+    case Running:
+        main_analyzer->Update();
+        if (main_menu_ptr && supervisor_ptr->gamemode_current != gamemodes::replay) {
+            main_analyzer->analyze_state = Ending;
+        }
+        break;
+    case Ending:
+        main_analyzer->SaveResults("Results.txt");
+        main_analyzer->analyze_state = Inactive;
+        break;
+    case Inactive:
+    default:
+        break;
     }
     return 1;
 }

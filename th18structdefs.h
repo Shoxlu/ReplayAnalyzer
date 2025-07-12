@@ -4,6 +4,7 @@
 #include <dinput.h>
 #include <Windows.h>
 
+namespace th18{
 //Data from my researches and mostly from th-re-data github
 
 struct zMainMenu;
@@ -1016,3 +1017,5 @@ enum Keys {
 enum gamemodes {
     replay = 13
 };
+
+}
