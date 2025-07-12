@@ -4,6 +4,7 @@
 Analyzer::Analyzer()
 {
 	observations.resize(2);
+	Sleep(3000);
 	observations[Lives] = WatcherInt(&global_ptr->inner.current_lives);//is it useful to watch for lives when the game already tracks that ? Guess it's PoC...
 	observations[Bombs] = WatcherInt(&global_ptr->inner.current_bombs);
 }
@@ -23,11 +24,18 @@ void Analyzer::Update()
 	//Weird code coming, don't know yet how to make it suck less
 
 	if (observations[Lives].hasDecreased()) {
-		results.n_miss++;
+		results.n_miss -= observations[Lives].diff;
+		printf("Miss !\n");
 	}
-
-	if (observations[Bombs].hasDecreased()) {
-		results.n_bombs++;
+	else if (observations[Bombs].hasDecreased()) {
+		results.n_bombs -= observations[Bombs].diff;
+		printf("Bomb !\n");
 	}
 	
+}
+
+void Analyzer::SaveResults(std::string file_name)
+{
+	//Temporary
+	printf("Misses: %d, Bombs used: %d\n", results.n_miss, results.n_bombs);
 }

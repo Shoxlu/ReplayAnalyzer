@@ -1,7 +1,6 @@
 #pragma once
 #include <cstdint>
 #include <d3d9.h>
-
 #include <dinput.h>
 #include <Windows.h>
 
@@ -580,7 +579,7 @@ struct zGlobalsInner
     int32_t field_78;
     int32_t current_bombs;
     int32_t field_80;
-    int32_t field_70;
+    int32_t field_84;
     int32_t field_88;
     int32_t field_8C;
     int32_t field_90;
@@ -624,31 +623,12 @@ struct zGlobals
     int demorpy_index;
     zGlobalsInner inner;
 };
-//struct zGlobals {
-//    BYTE gap[28];//0x0
-//    int32_t stage_num; //1C
-//    int32_t stage_num_started_from;//?????????? //20
-//    BYTE gap2[4];//24
-//    int32_t time_in_stage;//28
-//    BYTE gap1[30];//2C
-//    int32_t graze_counter;//4C
-//    BYTE gap4[10];//50
-//    int32_t miss_count;//5A
-//    BYTE gap3[38];//5E
-//    int32_t current_lives;//130 ???
-//    BYTE gap10[12];
-//    int32_t current_bombs;
-//    //offset 0x88 : Global life count
-//};
+
 struct Color {
     double r;
     double g;
     double b;
     double a;
-};
-struct DataPoint32_t {
-    double inputs[2];
-    double expectedOutputs[2];
 };
 
 struct zMenuSelect {
@@ -997,6 +977,7 @@ struct zReplayManager
     void destructor() {
         reinterpret_cast<zReplayManagerDestructor_ptr>(0x461AD0)(this);
     }
+    void operator delete(void* self);
     int __unknown_0;
     zUpdateFunc* on_tick;
     zUpdateFunc* on_draw;

@@ -8,6 +8,7 @@ enum Watchers {
 };
 
 struct ReplayInfo {
+	ReplayInfo() :n_miss(0), n_bombs(0) {};
 	size_t n_miss;
 	size_t n_bombs;
 };
@@ -44,10 +45,11 @@ public:
 			return;
 		}
 		entry = *pEntry;
-		if (entry > prev_entry) {
+		diff = entry - prev_entry;
+		if (diff > 0) {
 			has_increased = true;
 		}
-		else if (entry < prev_entry) {
+		else if (diff < 0) {
 			has_decreased = true;
 		}
 		prev_entry = entry;
@@ -61,6 +63,7 @@ public:
 	bool hasDecreased() {
 		return has_decreased;
 	}
+	int diff;
 	int entry;
 	int* pEntry;
 private:
@@ -75,6 +78,7 @@ public:
 	~Analyzer();
 	void Update();
 	void SaveResults(std::string file_name);
+	int32_t analyze_state = 0;
 private:
 	std::vector<WatcherInt> observations;
 	ReplayInfo results;

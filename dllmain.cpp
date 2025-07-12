@@ -32,8 +32,7 @@ void patch_call(DWORD target, void* func) {
 
 //My code
 char user_replay_name[256] = {};
-int32_t analyze_state = 0;
-Analyzer main_analyzer;
+Analyzer* main_analyzer;
 
 
 void init();
@@ -71,7 +70,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
         writeMemory(0x462A67, fix_missing_bytes, sizeof(fix_missing_bytes));//je sais plus...
         writeMemory(0x461E06, force_speedup_replay, sizeof(force_speedup_replay));
         wcstombs(user_replay_name, argv[0], 256);
-        printf("End of dll init");
+        printf("End of dll init\n");
         break;
     }
     case DLL_THREAD_ATTACH:
@@ -88,6 +87,7 @@ void init() {
     retrieve_game_data();
     WINDOW->actual_time_second__ = 0.0; //do what i replaced in the WinMain's game function
     register_update();
+    main_analyzer = new Analyzer();
     printf("End of init func\n");
 }
 
@@ -102,14 +102,19 @@ int update() {
     //printf("update\n");
     retrieve_game_data();
    // printf("%x, %d, %d \n", main_menu_ptr, supervisor_ptr->gamemode_current, global_ptr->time);
-    if (main_menu_ptr && supervisor_ptr->gamemode_current == 4 && global_ptr->time > 1) {
-        if (analyze_state == 0) {
-            load_replay();
-            analyze_state = 1;
-        }
+    if (main_analyzer->analyze_state == 0 && main_menu_ptr && supervisor_ptr->gamemode_current == 4 && global_ptr->time > 1) {
+        load_replay();
+        main_analyzer->analyze_state = 1;
     }
-    if (analyze_state == 1) {
-        main_analyzer.Update();
+    else if (main_analyzer->analyze_state == 1) {
+       main_analyzer->Update();
+       if (main_menu_ptr && supervisor_ptr->gamemode_current != gamemodes::replay) {
+           main_analyzer->analyze_state = 2;
+       }
+    }
+    else if (main_analyzer->analyze_state == 2) {
+        main_analyzer->SaveResults("Placeholder");
+        main_analyzer->analyze_state = 3;
     }
     return 1;
 }
@@ -120,15 +125,13 @@ void load_replay() {
     zReplayManager* replay_man = zReplayManager::zReplayManager_new(replay_name_ptr);
     auto v9 = &replay_man->__stage_array[0].gamestate_at_stage_begin;
     int j = 0;
-    for (j= 0; j < 8; ++j)
-    {
-        if (*v9)
-            break;
+    for (j= 0; j < 8 && !(*v9); ++j)
+    {   
         v9 += 10;
     }
     global_ptr->inner.stage_num = j;
     global_ptr->inner.__stage_num = j;
-    supervisor_ptr->gamemode_to_switch_to = 13;
+    supervisor_ptr->gamemode_to_switch_to = gamemodes::replay;
     auto replay_info = replay_man->replay_info;
     *CUR_STAGE_DATA = &STAGE_DATA_TABLE[j];
   
@@ -136,8 +139,9 @@ void load_replay() {
     global_ptr->inner.subshot = replay_info->subshot;
     global_ptr->inner.field_FC = global_ptr->inner.difficulty;
     global_ptr->inner.difficulty = replay_info->difficulty;
-    replay_man->destructor();
-    operator_delete(replay_man);
+    /*replay_man->destructor();
+    operator_delete(replay_man);*/
+    delete replay_man;
     *dword_4CF438 = 1;
 }
 
