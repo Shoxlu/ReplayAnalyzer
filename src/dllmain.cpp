@@ -9,9 +9,11 @@
 //Khangaroo's code
 void writeMemory(void* dst, void* src, size_t len) {
     DWORD prot;
-    VirtualProtect(dst, len, PAGE_READWRITE, &prot);
+    WINBOOL res = VirtualProtect(dst, len, PAGE_READWRITE, &prot);
+    printf("1: res = %u, error:%d\n", res, GetLastError());
     memcpy(dst, src, len);
-    VirtualProtect(dst, len, prot, &prot);
+    res = VirtualProtect(dst, len, prot, &prot);
+    printf("2: res = %u, error:%d\n", res, GetLastError());
 }
 void writeMemory(DWORD dst, void* src, size_t len) {
     writeMemory((void*)dst, src, len);
@@ -55,12 +57,12 @@ BOOL APIENTRY DllMain( HMODULE hModule,
         AllocConsole();
         auto a = freopen("CONIN$", "r", stdin);
         a = freopen("CONOUT$", "w", stdout);
-        SetConsoleTitle(L"ReplayAnalyzer Debug");
+        SetConsoleTitleW(L"ReplayAnalyzer Debug");
         printf("Preparing to run........\n");
         printf("DLL loaded!\n");
         auto id = GetCurrentProcessId();
         auto hprocess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, id);
-        patch_call(0x4719B8, init);
+        patch_call(0x4719B8, (void*)init);
         BYTE fix_missing_bytes2[] = { 0x90, 0x90, 0x90 };
         BYTE fix_missing_bytes[] = { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
         BYTE force_speedup_replay[] = { 0x06 };
@@ -92,7 +94,7 @@ void init() {
 }
 
 void register_update() {
-    zUpdateFunc* update_function = zUpdateFunc::operator_new(update);
+    zUpdateFunc* update_function = zUpdateFunc::operator_new((void*)update);
     update_function->flags |= 3u;//magic number from decomp (don't know what it's doing)
     register__on_tick(update_function, 1);
 }

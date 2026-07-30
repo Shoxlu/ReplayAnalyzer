@@ -634,7 +634,7 @@ struct Color {
 
 struct zMenuSelect {
     int set_index(int32_t pos) {
-        reinterpret_cast<FunctionPtrArg1>(0x416BA0)(this, pos); //call the game method
+        return reinterpret_cast<FunctionPtrArg1>(0x416BA0)(this, pos); //call the game method
     }
     int32_t selection_index;
     int32_t selection_on_prev_tick;
